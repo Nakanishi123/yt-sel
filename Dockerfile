@@ -1,7 +1,6 @@
-ARG YT_DLP_VERSION
-
 FROM python:3.13.7-trixie
 
+ARG YT_DLP_VERSION
 WORKDIR /usr/src/app
 
 RUN apt-get update && apt-get install -y curl libcurl4-openssl-dev\
