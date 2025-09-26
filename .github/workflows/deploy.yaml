@@ -82,5 +82,6 @@ jobs:
           push: true
           tags: |
             ${{env.IMAGE_NAME}}:${{env.NIGHTLY_VERSION}}
+            ${{env.IMAGE_NAME}}:nightly
           build-args: |
             YT_DLP_VERSION=${{env.NIGHTLY_VERSION}}
