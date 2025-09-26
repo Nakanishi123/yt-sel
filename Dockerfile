@@ -1,4 +1,4 @@
-FROM python:3.13.7-trixie
+FROM python:3.13.7-slim-trixie
 
 ARG YT_DLP_VERSION
 WORKDIR /usr/src/app
