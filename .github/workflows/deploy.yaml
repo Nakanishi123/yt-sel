@@ -1,0 +1,86 @@
+name: Build and Deploy Docker Image
+
+on:
+  schedule:
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ghcr.io/nakanishi123/yt-sel
+  FFMPEG_URL: https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2025-09-25-18-11/ffmpeg-N-121208-g2c8835dd72-linux64-gpl.tar.xz
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 📥 Get latest version from PyPI
+        run: |
+          curl -s https://pypi.org/pypi/yt-dlp/json > yt-dlp.json
+
+          STABLE_VERSION=$(jq -r .info.version yt-dlp.json)
+          echo "STABLE_VERSION=$STABLE_VERSION" >> $GITHUB_ENV
+          echo "Stable version: $STABLE_VERSION"
+
+          NIGHTLY_VERSION=$(jq -r '.releases | keys[]' yt-dlp.json | sort -V | tail -n 1)
+          echo "NIGHTLY_VERSION=$NIGHTLY_VERSION" >> $GITHUB_ENV
+          echo "Nightly version: $NIGHTLY_VERSION"
+
+      - name: Check if Stable image exists
+        id: check_stable
+        continue-on-error: true
+        run: |
+          docker manifest inspect ${{env.IMAGE_NAME}}:${{env.STABLE_VERSION}}
+          exit $?
+
+      - name: Check if Nightly image exists
+        id: check_nightly
+        continue-on-error: true
+        run: |
+          docker manifest inspect ${{env.IMAGE_NAME}}:${{env.NIGHTLY_VERSION}}
+          exit $?
+
+      - name: Download ffmpeg and ffprobe
+        if: steps.check_stable.outcome == 'failure' || steps.check_nightly.outcome == 'failure'
+        run: |
+          curl -Lo ffmpeg.tar.xz ${{env.FFMPEG_URL}}
+          xz -dc ffmpeg.tar.xz |tar xfv - --strip-components=2
+
+      - name: Build and push Stable Docker image
+        if: steps.check_stable.outcome == 'failure'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{env.IMAGE_NAME}}:${{env.STABLE_VERSION}}
+            ${{env.IMAGE_NAME}}:latest
+          build-args: |
+            YT_DLP_VERSION=${{env.STABLE_VERSION}}
+
+      - name: Build and push Nightly Docker image
+        if: steps.check_nightly.outcome == 'failure'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{env.IMAGE_NAME}}:${{env.NIGHTLY_VERSION}}
+          build-args: |
+            YT_DLP_VERSION=${{env.NIGHTLY_VERSION}}
