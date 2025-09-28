@@ -3,7 +3,10 @@ FROM python:3.13.7-slim-trixie
 ARG YT_DLP_VERSION
 WORKDIR /usr/src/app
 
-RUN apt-get update && apt-get install -y curl libcurl4-openssl-dev\
+RUN apt-get update && apt-get install -y curl libcurl4-openssl-dev unzip\
+    && curl -fsSL https://deno.land/install.sh | sh \
+    && apt-get remove --purge -y unzip \
+    && apt-get -y autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
