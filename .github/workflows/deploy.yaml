@@ -7,7 +7,7 @@ on:
 
 env:
   IMAGE_NAME: ghcr.io/nakanishi123/yt-sel
-  FFMPEG_URL: https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2025-09-25-18-11/ffmpeg-N-121208-g2c8835dd72-linux64-gpl.tar.xz
+  FFMPEG_URL: https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2025-09-30-14-30/ffmpeg-N-121271-g74115b017c-linux64-gpl.tar.xz
 
 jobs:
   build-deploy:
