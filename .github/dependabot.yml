@@ -7,7 +7,6 @@ updates:
     groups:
       docker-dependencies:
         applies-to: version-updates
-        dependency-type: "all"
 
   - package-ecosystem: pip
     directory: "/"
@@ -16,7 +15,6 @@ updates:
     groups:
       pip-dependencies:
         applies-to: version-updates
-        dependency-type: "all"
         update-types:
           - "minor"
           - "patch"
