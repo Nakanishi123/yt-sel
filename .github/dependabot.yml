@@ -4,8 +4,19 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      docker-dependencies:
+        applies-to: version-updates
+        patterns:
+          - "*"
 
   - package-ecosystem: pip
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      pip-dependencies:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
